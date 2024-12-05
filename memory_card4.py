@@ -6,20 +6,6 @@ from PyQt5.QtWidgets import (
         QPushButton, QLabel)
 from random import randint, shuffle
 
-class Question():
-    ''' содержит вопрос, правильный ответ и три неправильных'''
-    def __init__(self, question, right_answer, wrong1, wrong2, wrong3):
-        self.question = question
-        self.right_answer = right_answer
-        self.wrong1 = wrong1
-        self.wrong2 = wrong2
-        self.wrong3 = wrong3
-
-questions_list = []
-questions_list.append(Question('Государственный язык Бразилии', 'Португальский', 'Английский', 'Испанский', 'Бразильский'))
-questions_list.append(Question('Какого цвета нет на флаге России?', 'Зелёный', 'Красный', 'Белый', 'Синий'))
-questions_list.append(Question('Национальная хижина якутов', 'Ураса', 'Юрта', 'Иглу', 'Хата'))
-
 app = QApplication([])
 
 btn_OK = QPushButton('Ответить') # кнопка ответа
@@ -54,8 +40,8 @@ lb_Result = QLabel('прав ты или нет?') # здесь размещае
 lb_Correct = QLabel('ответ будет тут!') # здесь будет написан текст правильного ответа
 
 layout_res = QVBoxLayout()
-layout_res.addWidget(lb_Result, alignment=(Qt.AlignLeft | Qt.AlignTop))
-layout_res.addWidget(lb_Correct, alignment=Qt.AlignHCenter, stretch=2)
+layout_res.addWidget(lb_Result, alignment=Qt.AlignCenter)
+layout_res.addWidget(lb_Correct, alignment=Qt.AlignHCenter)
 AnsGroupBox.setLayout(layout_res)
 
 layout_line1 = QHBoxLayout() # вопрос
@@ -68,7 +54,7 @@ layout_line2.addWidget(AnsGroupBox)
 AnsGroupBox.hide() # скроем панель с ответом, сначала должна быть видна панель вопросов
 
 layout_line3.addStretch(1)
-layout_line3.addWidget(btn_OK, stretch=2) # кнопка должна быть большой
+layout_line3.addWidget(btn_OK, stretch=1) # кнопка должна быть большой
 layout_line3.addStretch(1)
 
 layout_card = QVBoxLayout()
@@ -80,6 +66,27 @@ layout_card.addStretch(1)
 layout_card.addLayout(layout_line3, stretch=1)
 layout_card.addStretch(1)
 layout_card.setSpacing(5) # пробелы между содержимым
+
+class Question:
+    ''' содержит вопрос, правильный ответ и три неправильных'''
+    def __init__(self, question, right_answer, wrong1, wrong2, wrong3):
+        self.question = question
+        self.right_answer = right_answer
+        self.wrong1 = wrong1
+        self.wrong2 = wrong2
+        self.wrong3 = wrong3
+
+questions_list = []
+questions_list.append(Question('Государственный язык Бразилии', 'Португальский', 'Английский', 'Испанский', 'Бразильский'))
+questions_list.append(Question('Какого цвета нет на флаге России?', 'Зелёный', 'Красный', 'Белый', 'Синий'))
+questions_list.append(Question('Национальная хижина якутов', 'Ураса', 'Юрта', 'Иглу', 'Хата'))
+questions_list.append(Question('Самый лучший язык программирования', 'Python', 'JavaScript', 'C++', 'Java'))
+questions_list.append(Question('Кто из этих персонажей не дружит с Гарри Поттером?', 'Драко Малфой', 'Рон Уизли', 'Невилл Лонгботтом', 'Гермиона Грейнджер'))
+questions_list.append(Question('Какая планета самая горячая?', 'Венера', 'Сатурн', 'Меркурий', 'Марс'))
+questions_list.append(Question('Как назывался корабль капитана Джека Воробья в "Пиратах Карибского моря"?', 'Черная жемчужина', 'Мародер', 'Черный питон', 'Слизерин'))
+questions_list.append(Question('Fe — это символ какого химического элемента?', 'Железо', 'Цинк', 'Водород', 'Фтор'))
+questions_list.append(Question('Какая планета в нашей Солнечной системе самая большая?', 'Юпитер', 'Сатурн', 'Нептун', 'Земля'))
+questions_list.append(Question('Какое животное не фигурирует в китайском зодиаке?', 'Колибри', 'Собака', 'Кролик', 'Дракон'))
 
 answers = [rbtn_1, rbtn_2, rbtn_3, rbtn_4]
 
@@ -133,23 +140,28 @@ def check_answer():
             print(f'Рейтинг: {window.score/window.total*100}%')
 
 def next_question():
-    ''' задает случайный вопрос из списка '''
-    window.total += 1
-    print(f'Статистика\n-Всего вопросов: {window.total} \n-Правильных ответов: {window.score}')
-    # нам не нужно старое значение,
-    # поэтому можно использовать локальную переменную!
-    cur_question = randint(0, len(questions_list) - 1)
-            # случайно взяли вопрос в пределах списка
-            # если внести около сотни слов, то редко будет повторяться
-    q = questions_list[cur_question] # взяли вопрос
-    ask(q) # спросили
-
+    ''' задает следующий вопрос или завершает викторину '''
+    if questions_list:  # Проверяем, остались ли вопросы
+        window.total += 1  # Увеличиваем счетчик общего количества вопросов
+        print(f'Статистика\n-Всего вопросов: {window.total} \n-Правильных ответов: {window.score}')        
+        # Получаем и удаляем случайный вопрос из списка
+        cur_question = questions_list.pop(randint(0, len(questions_list) - 1))
+        ask(cur_question)  # Задаем вопрос
+    else:
+        # Если вопросы закончились, завершаем викторину
+        lb_Question.setText('Викторина завершена!')
+        lb_Result.setText(f'Вы ответили правильно на {window.score} из {window.total} вопросов.')
+        btn_OK.hide()  # Скрываем кнопку
+        RadioGroupBox.hide()  # Скрываем варианты ответов
+        AnsGroupBox.show()  # Показываем панель с результатами
+        
+# Обработчик нажатия кнопки
 def click_OK():
     ''' определяет, надо ли показывать другой вопрос либо проверить ответ на этот '''
     if btn_OK.text() == 'Ответить':
-        check_answer() # проверка ответа
+        check_answer()  # Проверка ответа
     else:
-        next_question() # следующий вопрос
+        next_question()  # Следующий вопрос
 
 window = QWidget()
 window.setLayout(layout_card)
